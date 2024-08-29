@@ -34,7 +34,7 @@ namespace DoclogixTask
 
             if (typeof(Record).GetProperty(parserResult.Property) == null)
             {
-                Console.WriteLine("Property does not exist");
+                Console.WriteLine("Column not found");
                 return null;
             }
 
