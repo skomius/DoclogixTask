@@ -32,7 +32,7 @@ namespace DoclogixTask
                 {
                     if (expression == null)
                         expression = GetExpression<T>(parameter, field);
-                    else if(serachQuery.Operator == QParser.BoolOperator.AND)
+                    else if(serachQuery.Operator == QParser.LogicalOperator.AND)
                         expression = Expression.AndAlso(expression, GetExpression<T>(parameter, field));
                     else
                         expression = Expression.OrElse(expression, GetExpression<T>(parameter, field));

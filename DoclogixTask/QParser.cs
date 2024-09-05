@@ -22,16 +22,16 @@ namespace DoclogixTask
             fields = query.Split("And").Select(s => s.Trim());
             if(fields.Count() > 1)
             {
-                return new SearchQuery { Operator = BoolOperator.AND, Fields = FieldParse(fields) };
+                return new SearchQuery { Operator = LogicalOperator.AND, Fields = FieldParse(fields) };
             }
 
             fields = query.Split("Or").Select(s => s.Trim());
             if (fields.Count() > 1)
             {
-                return new SearchQuery { Operator = BoolOperator.OR, Fields = FieldParse(fields) };
+                return new SearchQuery { Operator = LogicalOperator.OR, Fields = FieldParse(fields) };
             }
 
-            return new SearchQuery { Operator = BoolOperator.NONE, Fields = FieldParse(fields) };
+            return new SearchQuery { Operator = LogicalOperator.NONE, Fields = FieldParse(fields) };
         }
 
         IEnumerable<Field> FieldParse(IEnumerable<string> fields)
@@ -42,7 +42,7 @@ namespace DoclogixTask
 
                 if (parsedField.Length != 2)
                 {
-                    throw new InvalidOperationException("Query parsing failed");
+                    throw new LogSearchException("Query parsing failed");
                 }
 
                 var property = parsedField[0].FirstCharToUpper();
@@ -79,7 +79,7 @@ namespace DoclogixTask
             return opr;
         }
 
-        public enum BoolOperator
+        public enum LogicalOperator
         {
             AND,
             OR,

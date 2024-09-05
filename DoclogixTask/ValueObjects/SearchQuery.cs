@@ -10,7 +10,7 @@ namespace DoclogixTask.ValueObjects
 {
     public class SearchQuery
     {
-        public BoolOperator Operator { get; set; }
+        public LogicalOperator Operator { get; set; }
 
         public IEnumerable<Field> Fields { get; set; }
     }

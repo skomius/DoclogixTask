@@ -45,8 +45,8 @@ namespace DoclogixTask
 
             Record[] results;
 
-            var func = _expressionBuilder.GetExpression<Record>(searchQuery);
-            results = _logsCollection.LogsRecords.Where(func).ToArray();
+            var expression = _expressionBuilder.GetExpression<Record>(searchQuery);
+            results = _logsCollection.LogsRecords.Where(expression).ToArray();
 
             return
                 new SearchResult

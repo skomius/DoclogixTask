@@ -52,9 +52,14 @@ public class Application
                 }
 
             }
+            catch (LogSearchException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
             }
 
             return 0;
@@ -68,9 +73,14 @@ public class Application
                 importer.ImportFile(importOptions.Path, importOptions.Severity);
                 Console.WriteLine("File imported successfully");
             }
+            catch (LogSearchException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
             }
             return 0;
         }
