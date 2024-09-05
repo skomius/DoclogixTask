@@ -10,37 +10,42 @@ using DoclogixTask.ValueObjects;
 
 namespace DoclogixTask
 {
-    public class Searcher: ISearcher
+    public class Searcher : ISearcher
     {
         private readonly IQParser _qParser;
         private readonly IExpressionBuilder _expressionBuilder;
         private readonly ILogsCollection _logsCollection;
+        private readonly ILogger _logger;
 
-        public Searcher( IQParser qParser, IExpressionBuilder expressionBuilder, ILogsCollection logsCollection ) 
+        public Searcher(IQParser qParser, IExpressionBuilder expressionBuilder, ILogsCollection logsCollection, ILogger logger)
         {
-            _qParser = qParser ?? throw new ArgumentNullException(nameof( qParser));
-            _expressionBuilder = expressionBuilder ?? throw new ArgumentNullException( nameof( expressionBuilder));
+            _qParser = qParser ?? throw new ArgumentNullException(nameof(qParser));
+            _expressionBuilder = expressionBuilder ?? throw new ArgumentNullException(nameof(expressionBuilder));
             _logsCollection = logsCollection ?? throw new ArgumentNullException(nameof(logsCollection));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public SearchResult? Search(string query)
         {
-            var parserResult = _qParser.QueryParser(query);
+            var searchQuery = _qParser.QueryParser(query);
 
-            if (parserResult == null)
+            if (searchQuery == null)
             {
                 throw new InvalidOperationException("Query parsing failed");
             }
 
-            if (typeof(Record).GetProperty(parserResult.Property) == null)
+            foreach (var field in searchQuery.Fields)
             {
-                Console.WriteLine("Column not found");
-                return null;
+                if (typeof(Record).GetProperty(field.Property) == null)
+                {
+                    _logger.Log($"Column by name {field.Property} not found");
+                    return null;
+                }
             }
 
             Record[] results;
 
-            var func = _expressionBuilder.GetExpression<Record>(new List<ParseResult>() { parserResult });
+            var func = _expressionBuilder.GetExpression<Record>(searchQuery);
             results = _logsCollection.LogsRecords.Where(func).ToArray();
 
             return

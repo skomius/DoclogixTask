@@ -31,7 +31,7 @@ namespace DoclogixTask
                         var record = csv.GetRecord<Record>();
                         _logsCollection.LogsRecords.Add(record);
 
-                        if (record.severity <= minSeverity)
+                        if (record.Severity <= minSeverity)
                         {
                             Console.WriteLine(JsonConvert.SerializeObject(record, Formatting.Indented));
                         }

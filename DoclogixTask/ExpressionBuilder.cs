@@ -18,34 +18,36 @@ namespace DoclogixTask
 
         public ExpressionBuilder() { }
 
-        public Func<T, bool> GetExpression<T>(IList<ParseResult> filters)
+        public Func<T, bool> GetExpression<T>(SearchQuery serachQuery)
         {
             
             ParameterExpression parameter = Expression.Parameter(typeof(T), "t");
             Expression expression = null;
 
-            if (filters == null || !filters.Any())
+            if (serachQuery == null || !serachQuery.Fields.Any())
                 expression = Expression.Equal(Expression.Default(typeof(T)), Expression.Default(typeof(T)));
             else
             {
-                foreach (var filter in filters)
+                foreach (var field in serachQuery.Fields)
                 {
                     if (expression == null)
-                        expression = GetExpression<T>(parameter, filter);
+                        expression = GetExpression<T>(parameter, field);
+                    else if(serachQuery.Operator == QParser.BoolOperator.AND)
+                        expression = Expression.AndAlso(expression, GetExpression<T>(parameter, field));
                     else
-                        expression = Expression.AndAlso(expression, GetExpression<T>(parameter, filter));
+                        expression = Expression.OrElse(expression, GetExpression<T>(parameter, field));
                 }
             }
 
             return Expression.Lambda<Func<T, bool>>(expression, parameter).Compile();
         }
 
-        private static Expression GetExpression<T>(ParameterExpression parameter, ParseResult filter)
+        private static Expression GetExpression<T>(ParameterExpression parameter, Field field)
         {
-            MemberExpression member = Expression.PropertyOrField(parameter, filter.Property);
-            UnaryExpression constant = GetUnary(member, filter);
+            MemberExpression member = Expression.PropertyOrField(parameter, field.Property);
+            UnaryExpression constant = GetUnary(member, field);
 
-            switch (filter.Operator)
+            switch (field.Operator)
             {
                 case Operator.Equals:
                         return Expression.Equal(member, constant);
@@ -78,7 +80,7 @@ namespace DoclogixTask
             return null;
         }
 
-        private static UnaryExpression GetUnary(MemberExpression member, ParseResult filter)
+        private static UnaryExpression GetUnary(MemberExpression member, Field filter)
         {
             if (filter.Value is string)
                 return Expression.Convert(Expression.Constant(filter.Value), member.Type);

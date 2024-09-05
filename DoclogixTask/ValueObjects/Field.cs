@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace DoclogixTask.ValueObjects
 {
-    internal class Field
+    public class Field
     {
+        public object Value { get; set; }
+        public Operator Operator { get; set; }
         public string Property { get; set; }
-        public string Op { get; set; }
-        public string Value { get; set; }
     }
 }

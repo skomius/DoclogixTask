@@ -4,6 +4,6 @@ namespace DoclogixTask.Interface
 {
     public interface IQParser 
     {
-        public ParseResult QueryParser(string query);
+        public SearchQuery QueryParser(string query);
     }
 }

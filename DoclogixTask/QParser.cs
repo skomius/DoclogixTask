@@ -7,43 +7,62 @@ using System.Threading.Tasks;
 using DoclogixTask.Interface;
 using DoclogixTask.ValueObjects;
 using Newtonsoft.Json.Linq;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace DoclogixTask
 {
-    public class QParser: IQParser
+    public class QParser : IQParser
     {
-        public QParser() {}
+        public QParser() { }
 
-        public ParseResult QueryParser(string query)
+        public SearchQuery QueryParser(string query)
         {
-            var parsedField = query.Split('=');
+            IEnumerable<string> fields = Enumerable.Empty<string>();
 
-            if (parsedField.Length != 2)
+            fields = query.Split("And").Select(s => s.Trim());
+            if(fields.Count() > 1)
             {
-                throw new InvalidOperationException("Query parsing failed");
+                return new SearchQuery { Operator = BoolOperator.AND, Fields = FieldParse(fields) };
             }
 
-            var field = new Field
+            fields = query.Split("Or").Select(s => s.Trim());
+            if (fields.Count() > 1)
             {
-                Property = parsedField[0],
-                Op = "=",
-                Value = parsedField[1]
-            };
-
-            bool boolOut;
-
-            if (bool.TryParse(field.Value, out boolOut))
-            {
-                return new ParseResult { Value = boolOut, Operator = Operator.Equals, Property = field.Property };
+                return new SearchQuery { Operator = BoolOperator.OR, Fields = FieldParse(fields) };
             }
-            else if (field.Value.StartsWith('\'') && field.Value.EndsWith('\''))
+
+            return new SearchQuery { Operator = BoolOperator.NONE, Fields = FieldParse(fields) };
+        }
+
+        IEnumerable<Field> FieldParse(IEnumerable<string> fields)
+        {
+            foreach (var field in fields)
             {
-                var valueNoQuotes = field.Value.Trim('\'');
-                return new ParseResult { Value = valueNoQuotes.Trim('*'), Operator = ValueParser(valueNoQuotes), Property = field.Property };
-            }
-            else
-            {
-                throw new InvalidOperationException("Query parsing failed");
+                var parsedField = field.Split('=');
+
+                if (parsedField.Length != 2)
+                {
+                    throw new InvalidOperationException("Query parsing failed");
+                }
+
+                var property = parsedField[0].FirstCharToUpper();
+                var value = parsedField[1];
+
+                bool boolOut;
+
+                if (bool.TryParse(value, out boolOut))
+                {
+                    yield return new Field { Value = boolOut, Operator = Operator.Equals, Property = property };
+                }
+                else if (value.StartsWith('\'') && value.EndsWith('\''))
+                {
+                    var valueNoQuotes = value.Trim('\'');
+                    yield return new Field { Value = valueNoQuotes.Trim('*'), Operator = ValueParser(valueNoQuotes), Property = property };
+                }
+                else
+                {
+                    throw new InvalidOperationException("Query parsing failed");
+                }
             }
         }
 
@@ -58,6 +77,13 @@ namespace DoclogixTask
             };
 
             return opr;
+        }
+
+        public enum BoolOperator
+        {
+            AND,
+            OR,
+            NONE
         }
     }
 }
