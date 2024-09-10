@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using DoclogixTask.Interface;
 using DoclogixTask.ValueObjects;
 using Newtonsoft.Json.Linq;
+using static DoclogixTask.QParser;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace DoclogixTask
@@ -19,17 +20,19 @@ namespace DoclogixTask
         {
             IEnumerable<string> fields = Enumerable.Empty<string>();
 
-            fields = query.Split("And").Select(s => s.Trim());
+            fields = query.Split(Constants.AndLogicalOperator).Select(s => s.Trim());
             if(fields.Count() > 1)
             {
                 return new SearchQuery { Operator = LogicalOperator.AND, Fields = FieldParse(fields) };
             }
 
-            fields = query.Split("Or").Select(s => s.Trim());
+            fields = query.Split(Constants.OrLogicalOperator).Select(s => s.Trim());
             if (fields.Count() > 1)
             {
                 return new SearchQuery { Operator = LogicalOperator.OR, Fields = FieldParse(fields) };
             }
+
+
 
             return new SearchQuery { Operator = LogicalOperator.NONE, Fields = FieldParse(fields) };
         }
