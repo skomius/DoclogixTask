@@ -20,19 +20,24 @@ namespace DoclogixTask
         {
             IEnumerable<string> fields = Enumerable.Empty<string>();
 
-            fields = query.Split(Constants.AndLogicalOperator).Select(s => s.Trim());
-            if(fields.Count() > 1)
+            var andFields = query.Split(Constants.AndLogicalOperator).Select(s => s.Trim());
+            var orFields = query.Split(Constants.OrLogicalOperator).Select(s => s.Trim());
+
+            if(andFields.Count() > 1 && orFields.Count() > 1)
+            {
+                throw new LogSearchException("Error. Multiple logical operator not supported");
+            }
+
+            if (andFields.Count() > 1)
             {
                 return new SearchQuery { Operator = LogicalOperator.AND, Fields = FieldParse(fields) };
             }
 
             fields = query.Split(Constants.OrLogicalOperator).Select(s => s.Trim());
-            if (fields.Count() > 1)
+            if (orFields.Count() > 1)
             {
                 return new SearchQuery { Operator = LogicalOperator.OR, Fields = FieldParse(fields) };
             }
-
-
 
             return new SearchQuery { Operator = LogicalOperator.NONE, Fields = FieldParse(fields) };
         }
