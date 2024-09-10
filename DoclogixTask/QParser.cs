@@ -25,7 +25,7 @@ namespace DoclogixTask
 
             if(andFields.Count() > 1 && orFields.Count() > 1)
             {
-                throw new LogSearchException("Error. Multiple logical operator not supported");
+                throw new LogSearchException("Error. Multiple logical operators not supported");
             }
 
             if (andFields.Count() > 1)
