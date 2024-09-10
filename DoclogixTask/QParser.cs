@@ -42,7 +42,7 @@ namespace DoclogixTask
             return new SearchQuery { Operator = LogicalOperator.NONE, Fields = FieldParse(fields) };
         }
 
-        IEnumerable<Field> FieldParse(IEnumerable<string> fields)
+        private IEnumerable<Field> FieldParse(IEnumerable<string> fields)
         {
             foreach (var field in fields)
             {
@@ -74,7 +74,7 @@ namespace DoclogixTask
             }
         }
 
-        Operator ValueParser(string value)
+        private Operator ValueParser(string value)
         {
             Operator opr = (value.StartsWith('*'), value.EndsWith('*')) switch
             {
